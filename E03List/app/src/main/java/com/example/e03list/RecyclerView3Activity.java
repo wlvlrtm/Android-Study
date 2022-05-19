@@ -1,5 +1,9 @@
 package com.example.e03list;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -7,6 +11,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,7 +25,7 @@ import java.util.Date;
 import java.util.ListIterator;
 
 public class RecyclerView3Activity extends AppCompatActivity {
-
+    ActivityResultLauncher<Intent> activityResultLauncher;
     RecyclerView3Adapter recyclerView3Adapter;
     ArrayList<Memo3> arrayList;
 
@@ -35,13 +40,34 @@ public class RecyclerView3Activity extends AppCompatActivity {
         recyclerView3Adapter = new RecyclerView3Adapter(this, arrayList);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
-
-        recyclerView.addItemDecoration(new DividerItemDecoration(this,
-                DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(
+                new DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        );
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
         recyclerView.setAdapter(recyclerView3Adapter);
+
+        activityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            Intent intent = result.getData();
+                            Memo3 memo = (Memo3)intent.getSerializableExtra("MEMO");
+                            Integer index = (Integer)intent.getSerializableExtra("INDEX");
+                            if(index == null) {
+                                arrayList.add(memo);
+                            }
+                            else {
+                                arrayList.set(index, memo);
+                            }
+
+                            recyclerView3Adapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+        );
     }
 
     @Override   // Action Bar Create
@@ -56,7 +82,7 @@ public class RecyclerView3Activity extends AppCompatActivity {
 
         if (id == R.id.action_create) {
             Intent intent = new Intent(this, Memo3Activity.class);
-            startActivityForResult(intent, 0);
+            activityResultLauncher.launch(intent);
         }
         else if (id == R.id.action_remove) {
             removeMemos();
@@ -66,16 +92,12 @@ public class RecyclerView3Activity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override   // WHEN '저장' btn Clicked -> CALL
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        if (resultCode == RESULT_OK) {
-            Memo3 memo = (Memo3)intent.getSerializableExtra("MEMO");
-            arrayList.add(memo);
-
-            recyclerView3Adapter.notifyDataSetChanged();
-        }
+    public void onMemoClicked(int index) {
+        Intent intent = new Intent(this, Memo3Activity.class);
+        Memo3 memo = arrayList.get(index);
+        intent.putExtra("MEMO", memo);
+        intent.putExtra("INDEX", index);
+        activityResultLauncher.launch(intent);
     }
 
     private void removeMemos() {

@@ -18,7 +18,6 @@ public class RecyclerView3Adapter extends RecyclerView.Adapter<RecyclerView3Adap
     LayoutInflater inflater;
     ArrayList<Memo3> arrayList;
 
-
     class ViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
         TextView textView_title;
@@ -50,10 +49,8 @@ public class RecyclerView3Adapter extends RecyclerView.Adapter<RecyclerView3Adap
         @Override   // Click Listener
         public void onClick(View view) {
             int index = super.getAdapterPosition();
-            Memo3 memo = arrayList.get(index);
-            String str = String.format("index: %d, title: %s", index, memo.getTitle());
-
-            Toast.makeText(view.getContext(), str, Toast.LENGTH_SHORT).show();
+            RecyclerView3Activity activity = (RecyclerView3Activity) textView_title.getContext();
+            activity.onMemoClicked(index);
         }
 
         @Override   // Check Change
