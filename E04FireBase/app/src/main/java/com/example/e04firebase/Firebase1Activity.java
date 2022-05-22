@@ -16,7 +16,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class Firebase1Activity extends AppCompatActivity {
+public class Firebase1Activity extends AppCompatActivity implements ValueEventListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,31 +29,23 @@ public class Firebase1Activity extends AppCompatActivity {
         DatabaseReference item01 = FirebaseDatabase.getInstance().getReference("item01");
 
         // EventListener
-        item01.addValueEventListener(new ValueEventListener() {
-            @Override   // IF, Data Received
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String value = snapshot.getValue(String.class);
-                TextView textView = findViewById(R.id.textView);
-
-                textView.setText(value);
-                Log.d("My Tag", "Received Data: " + value);
-            }
-
-            @Override   // IF, Error occurs
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("My Tag", "Server Error: ", error.toException());
-            }
-        });
-
+        item01.addValueEventListener(this);
+        EditText editText = findViewById(R.id.editText);
         Button btnSave = findViewById(R.id.btnSave);
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditText editText = findViewById(R.id.editText);
-                String str = editText.getText().toString();
+        // APP -> DB
+        btnSave.setOnClickListener((view) -> item01.setValue(editText.getText().toString()));
+    }
 
-                item01.setValue(str);   // To DB
-            }
-        });
+    @Override   // IF, Data Change; DB -> APP
+    public void onDataChange(@NonNull DataSnapshot snapshot) {
+        String value = snapshot.getValue(String.class);
+        TextView textView = findViewById(R.id.textView);
+        textView.setText(value);
+        Log.d("My Tag", "Received Data: " + value);
+    }
+
+    @Override   // IF, Error occurs
+    public void onCancelled(@NonNull DatabaseError error) {
+        Log.e("My Tag", "Server Error: ", error.toException());
     }
 }
