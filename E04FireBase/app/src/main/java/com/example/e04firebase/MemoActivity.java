@@ -53,13 +53,5 @@ public class MemoActivity extends AppCompatActivity {
                 finish();
             }
         });
-
-
-
     }
-
-
-
-
-
 }

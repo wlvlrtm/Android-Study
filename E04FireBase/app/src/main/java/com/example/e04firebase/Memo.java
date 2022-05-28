@@ -6,10 +6,10 @@ import java.util.Date;
 
 public class Memo implements Serializable {
     final static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    String title;
-    String content;
-    Date date;
-    boolean checked;
+    String title;       // memo.textView1
+    String content;     // activity_memo.editText_content
+    Date date;          // memo.textView2
+    boolean checked;    // memo.checkBox
 
     public Memo() {
     }
@@ -18,10 +18,6 @@ public class Memo implements Serializable {
         this.title = title;
         this.content = content;
         this.date = date;
-    }
-
-    public String getDateFormatted() {
-        return format.format(date);
     }
 
     public String getTitle() {
@@ -54,5 +50,9 @@ public class Memo implements Serializable {
 
     public void setChecked(boolean checked) {
         this.checked = checked;
+    }
+
+    public String getDateFormatted() {
+        return format.format(date);
     }
 }

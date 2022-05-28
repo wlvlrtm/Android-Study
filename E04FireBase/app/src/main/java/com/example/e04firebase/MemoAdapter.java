@@ -14,9 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.ViewHolder> {
-    ArrayList<Memo> arrayList;
-    LayoutInflater inflater;
-
     class ViewHolder extends RecyclerView.ViewHolder
                      implements View.OnClickListener,
                                 CompoundButton.OnCheckedChangeListener {
@@ -61,6 +58,10 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.ViewHolder> {
     }
 
 
+    LayoutInflater inflater;
+    ArrayList<Memo> arrayList;
+
+    // Constructor
     public MemoAdapter(Context context, ArrayList<Memo> arrayList) {
         this.inflater = LayoutInflater.from(context);
         this.arrayList = arrayList;

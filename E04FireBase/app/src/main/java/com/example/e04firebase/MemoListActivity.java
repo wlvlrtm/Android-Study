@@ -66,7 +66,7 @@ public class MemoListActivity extends AppCompatActivity {
             memoAdapter.notifyItemChanged(index);
         }
 
-        @Override
+        @Override   // Item Remove
         public void onChildRemoved(@NonNull DataSnapshot snapshot) {
             String key = snapshot.getKey();
             int index = findIndex(key);
@@ -158,8 +158,8 @@ public class MemoListActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int index) {
-                for(int i = 0; i < arrayList.size(); ++i) {
-                    if(arrayList.get(i).isChecked()) {
+                for (int i = 0; i < arrayList.size(); ++i) {
+                    if (arrayList.get(i).isChecked()) {
                         item.child(keyList.get(i)).removeValue();
                     }
                 }

@@ -14,11 +14,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public void Btn_Firebase1Activity(View view) {
-        Intent intent = new Intent(this, Firebase1Activity.class);
-        startActivity(intent);
-    }
-
     public void Btn_Clicked(View view) {
         Class classObj = null;
 
