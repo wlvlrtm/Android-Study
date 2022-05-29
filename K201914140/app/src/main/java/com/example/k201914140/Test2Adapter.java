@@ -1,7 +1,6 @@
 package com.example.k201914140;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,24 +20,22 @@ public class Test2Adapter extends RecyclerView.Adapter<Test2Adapter.ViewHolder> 
         }
     }
 
+
     ItemClick itemClick;
-
-    interface ItemClick {
-        void onItemClick (View view, int position);
-    }
-
-    public void setItemClick (ItemClick itemClick)
-    {
-        this.itemClick = itemClick;
-    }
-
-
     LayoutInflater layoutInflater;
     ArrayList<String> arrayList;
+
+    interface ItemClick {
+        void onItemClick(View view, int position);
+    }
 
     public Test2Adapter(Context context, ArrayList<String> arrayList) {
         this.layoutInflater = LayoutInflater.from(context);
         this.arrayList = arrayList;
+    }
+
+    public void setItemClick (ItemClick itemClick) {
+        this.itemClick = itemClick;
     }
 
     @Override
@@ -53,18 +50,15 @@ public class Test2Adapter extends RecyclerView.Adapter<Test2Adapter.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder viewHolder, int index) {
+    public void onBindViewHolder(final ViewHolder viewHolder, final int index) {
         viewHolder.textView.setText(arrayList.get(index));
 
         viewHolder.textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if (itemClick != null)
-                {
+                if (itemClick != null) {
                     itemClick.onItemClick(view, index);
                 }
-
             }
         });
     }

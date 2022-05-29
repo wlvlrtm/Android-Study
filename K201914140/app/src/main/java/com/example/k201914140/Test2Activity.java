@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -31,15 +30,13 @@ public class Test2Activity extends AppCompatActivity {
 
         arrayList = new ArrayList<String>();
         test2Adapter = new Test2Adapter(this, arrayList);
+
         test2Adapter.setItemClick(new Test2Adapter.ItemClick() {
             @Override
             public void onItemClick(View view, int position) {
                 Toast.makeText(Test2Activity.this, "POS : " + position, Toast.LENGTH_SHORT).show();
-
                 arrayList.remove(position);
                 test2Adapter.notifyDataSetChanged();
-
-
             }
         });
 
@@ -60,13 +57,5 @@ public class Test2Activity extends AppCompatActivity {
                 test2Adapter.notifyDataSetChanged();
             }
         });
-
-
-
-
-
-
     }
-
-
 }
