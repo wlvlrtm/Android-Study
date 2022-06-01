@@ -12,37 +12,45 @@ import android.widget.EditText;
 import java.util.Date;
 
 public class MemoActivity extends AppCompatActivity {
+    EditText editText_Title;
+    EditText editText_content;
+
+    Memo memo;
+    Integer index;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memo);
 
-        EditText editText_title = findViewById(R.id.editText_title);
-        EditText editText_content = findViewById(R.id.editText_content);
+        /////
 
-        Memo memo = (Memo)getIntent().getSerializableExtra("MEMO");
-        Integer index = (Integer)getIntent().getSerializableExtra("INDEX");
+        this.editText_Title = findViewById(R.id.editText_title);
+        this.editText_content = findViewById(R.id.editText_content);
 
-        if (memo != null) {
-            editText_title.setText(memo.getTitle());
-            editText_content.setText(memo.getContent());
+        this.memo = (Memo)getIntent().getSerializableExtra("MEMO");
+        this.index = (Integer)getIntent().getSerializableExtra("INDEX");
+
+        if (this.memo != null) {    // Memo RELOAD
+            this.editText_Title.setText(this.memo.getTitle());
+            this.editText_content.setText(this.memo.getContent());
         }
+    }
 
-        Button button = findViewById(R.id.btnSave);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String title = editText_title.getText().toString();
-                if(TextUtils.isEmpty(title)) {
-                    editText_title.setError("제목을 입력하세요.");
-                    return;
+    public void onButtonClick(View view) {
+        int id = view.getId();
+
+        switch (id) {
+            case R.id.button_Save :
+                String title = this.editText_Title.getText().toString();
+                String content = this.editText_content.getText().toString();
+
+                if (TextUtils.isEmpty(title)) {
+                    editText_Title.setError("제목을 입력하세요");
                 }
 
-                String content = editText_content.getText().toString();
-                if(TextUtils.isEmpty(content)) {
-                    editText_content.setError("내용을 입력하세요.");
-                    return;
+                if (TextUtils.isEmpty(content)) {
+                    editText_content.setError("본문을 입력하세요");
                 }
 
                 Memo memo = new Memo(title, content, new Date());
@@ -51,7 +59,7 @@ public class MemoActivity extends AppCompatActivity {
                 intent.putExtra("INDEX", index);
                 setResult(RESULT_OK, intent);
                 finish();
-            }
-        });
+        }
     }
+
 }

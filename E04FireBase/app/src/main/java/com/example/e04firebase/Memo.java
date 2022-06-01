@@ -1,15 +1,18 @@
 package com.example.e04firebase;
 
+import android.widget.CheckBox;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Memo implements Serializable {
-    final static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    String title;       // memo.textView1
-    String content;     // activity_memo.editText_content
-    Date date;          // memo.textView2
-    boolean checked;    // memo.checkBox
+    final static SimpleDateFormat dataFormat = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+    String title;
+    String content;
+    Date date;
+    CheckBox checkBox;
+    boolean checked;
 
     public Memo() {
     }
@@ -44,15 +47,23 @@ public class Memo implements Serializable {
         this.date = date;
     }
 
+    public CheckBox getCheckBox() {
+        return checkBox;
+    }
+
+    public void setCheckBox(CheckBox checkBox) {
+        this.checkBox = checkBox;
+    }
+
+    public String getDateFormatted() {
+        return dataFormat.format(date);
+    }
+
     public boolean isChecked() {
         return checked;
     }
 
     public void setChecked(boolean checked) {
         this.checked = checked;
-    }
-
-    public String getDateFormatted() {
-        return format.format(date);
     }
 }

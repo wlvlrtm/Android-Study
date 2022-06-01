@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -13,79 +12,28 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.ListIterator;
 
 public class MemoListActivity extends AppCompatActivity {
-
     MemoAdapter memoAdapter;
-    ArrayList<Memo> arrayList = new ArrayList<>();
-    ArrayList<String> keyList = new ArrayList<>();
+    ArrayList<Memo> memoArrayList;
     ActivityResultLauncher<Intent> activityResultLauncher;
-    DatabaseReference item;
+    DatabaseReference item02;
 
-    ChildEventListener firebaseListener = new ChildEventListener() {
-        private int findIndex(String key) {
-            return Collections.binarySearch(keyList, key);
-        }
-
-        @Override   // Item Add
-        public void onChildAdded(@NonNull DataSnapshot snapshot,
-                                 @Nullable String previousChildName) {
-            String key = snapshot.getKey();
-            Memo memo = snapshot.getValue(Memo.class);
-
-            arrayList.add(memo);
-            keyList.add(key);
-
-            memoAdapter.notifyItemInserted(arrayList.size()-1);
-        }
-
-        @Override   // Item Change
-        public void onChildChanged(@NonNull DataSnapshot snapshot,
-                                   @Nullable String previousChildName) {
-            String key = snapshot.getKey();
-            int index = findIndex(key);
-            Memo memo = snapshot.getValue(Memo.class);
-
-            arrayList.set(index, memo);
-
-            memoAdapter.notifyItemChanged(index);
-        }
-
-        @Override   // Item Remove
-        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-            String key = snapshot.getKey();
-            int index = findIndex(key);
-
-            arrayList.remove(index);
-            keyList.remove(index);
-
-            memoAdapter.notifyItemRemoved(index);
-        }
-
-        @Override
-        public void onChildMoved(@NonNull DataSnapshot snapshot,
-                                 @Nullable String previousChildName) {
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError error) {
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,12 +42,31 @@ public class MemoListActivity extends AppCompatActivity {
 
         /////
 
-        memoAdapter = new MemoAdapter(this, arrayList);
+        this.memoArrayList = new ArrayList<Memo>();
+        this.memoAdapter = new MemoAdapter(this, this.memoArrayList);
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.addItemDecoration(
-                new DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
-        );
+        this.item02 = FirebaseDatabase.getInstance().getReference("item02");
+        this.item02.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                GenericTypeIndicator<ArrayList<Memo>> typeIndicator;
+                typeIndicator = new GenericTypeIndicator<ArrayList<Memo>>() {};
+                ArrayList<Memo> temp  = snapshot.getValue(typeIndicator);
+
+                if (temp != null) {
+                    MemoListActivity.this.memoArrayList.clear();
+                    MemoListActivity.this.memoArrayList.addAll(temp);
+                }
+                MemoListActivity.this.memoAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(memoAdapter);
@@ -109,26 +76,23 @@ public class MemoListActivity extends AppCompatActivity {
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
                     public void onActivityResult(ActivityResult result) {
-                        if (result.getResultCode() == Activity.RESULT_OK) {
+                        if(result.getResultCode() == RESULT_OK) {
                             Intent intent = result.getData();
                             Memo memo = (Memo)intent.getSerializableExtra("MEMO");
                             Integer index = (Integer)intent.getSerializableExtra("INDEX");
 
-                            if (index == null) {    // ADD
-                                String key = item.push().getKey();
-                                item.child(key).setValue(memo);
+                            if (index == null) {    // New Memo Add
+                                memoArrayList.add(memo);
                             }
-                            else {  // EDIT
-                                String key = keyList.get(index);
-                                item.child(key).setValue(memo);
+                            else {
+                                memoArrayList.set(index, memo);
                             }
+                            item02.setValue(MemoListActivity.this.memoArrayList);
                             memoAdapter.notifyDataSetChanged();
                         }
                     }
                 }
         );
-        this.item = FirebaseDatabase.getInstance().getReference("item02");
-        this.item.addChildEventListener(firebaseListener);
     }
 
     @Override
@@ -140,6 +104,7 @@ public class MemoListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
         if (id == R.id.action_create) {
             Intent intent = new Intent(this, MemoActivity.class);
             activityResultLauncher.launch(intent);
@@ -157,12 +122,15 @@ public class MemoListActivity extends AppCompatActivity {
         builder.setMessage(R.string.doYouWantToDelete);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int index) {
-                for (int i = 0; i < arrayList.size(); ++i) {
-                    if (arrayList.get(i).isChecked()) {
-                        item.child(keyList.get(i)).removeValue();
+            public void onClick(DialogInterface dialogInterface, int i) {
+                ListIterator<Memo> memoListIterator = MemoListActivity.this.memoArrayList.listIterator();
+                while (memoListIterator.hasNext()) {
+                    if (memoListIterator.next().isChecked()) {
+                        memoListIterator.remove();
                     }
                 }
+                MemoListActivity.this.memoAdapter.notifyDataSetChanged();
+                MemoListActivity.this.item02.setValue(MemoListActivity.this.memoArrayList);
             }
         });
         builder.setNegativeButton(R.string.no, null);
@@ -172,7 +140,8 @@ public class MemoListActivity extends AppCompatActivity {
 
     public void onMemoClicked(int index) {
         Intent intent = new Intent(this, MemoActivity.class);
-        Memo memo = arrayList.get(index);
+        Memo memo = this.memoArrayList.get(index);
+
         intent.putExtra("MEMO", memo);
         intent.putExtra("INDEX", index);
         activityResultLauncher.launch(intent);

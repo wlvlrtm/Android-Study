@@ -1,7 +1,6 @@
 package com.example.e04firebase;
 
 import android.content.Context;
-import android.view.ContentInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,77 +8,76 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
 public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder
-                     implements View.OnClickListener,
-                                CompoundButton.OnCheckedChangeListener {
-        TextView textView1, textView2;
+            implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+        TextView textView_Title;
+        TextView textView_Date;
         CheckBox checkBox;
 
-        public ViewHolder(View view) {
-            super(view);
 
-            textView1 = view.findViewById(R.id.textView1);
-            textView2 = view.findViewById(R.id.textView2);
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
 
-            textView1.setOnClickListener(this::onClick);
-            textView2.setOnClickListener(this::onClick);
+            this.textView_Title = itemView.findViewById(R.id.textView_Title);
+            this.textView_Date = itemView.findViewById(R.id.textView_Date);
+            this.checkBox = itemView.findViewById(R.id.checkBox);
 
-            checkBox = view.findViewById(R.id.checkBox);
-            checkBox.setOnCheckedChangeListener(this::onCheckedChanged);
+            this.textView_Title.setOnClickListener(this);
+            this.textView_Date.setOnClickListener(this);
+            checkBox.setOnCheckedChangeListener(this);
         }
 
         public void setData(int index) {
-            Memo memo = arrayList.get(index);
-            textView1.setText(memo.getTitle());
-            textView2.setText(memo.getDateFormatted());
+            Memo memo = MemoAdapter.this.memoArrayList.get(index);
+            textView_Title.setText(memo.getTitle());
+            textView_Date.setText(memo.getDate().toString());
             checkBox.setChecked(memo.isChecked());
         }
 
         @Override
         public void onClick(View view) {
             int index = super.getAdapterPosition();
-
-            MemoListActivity activity = (MemoListActivity)textView1.getContext();
-            activity.onMemoClicked(index);
+            MemoListActivity memoListActivity = (MemoListActivity) textView_Title.getContext();
+            memoListActivity.onMemoClicked(index);
         }
 
         @Override
         public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
             int index = super.getAdapterPosition();
-
-            Memo memo = arrayList.get(index);
+            Memo memo = memoArrayList.get(index);
             memo.setChecked(b);
         }
     }
 
 
+    ArrayList<Memo> memoArrayList;
     LayoutInflater inflater;
-    ArrayList<Memo> arrayList;
 
-    // Constructor
-    public MemoAdapter(Context context, ArrayList<Memo> arrayList) {
+    public MemoAdapter(Context context, ArrayList<Memo> memoArrayList) {
         this.inflater = LayoutInflater.from(context);
-        this.arrayList = arrayList;
+        this.memoArrayList = memoArrayList;
     }
 
+    @NonNull
     @Override
-     public int getItemCount() {
-        return arrayList.size();
-    }
-
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        View view = inflater.inflate(R.layout.memo, viewGroup, false);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = inflater.inflate(R.layout.memo, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder viewHolder, final int index) {
-        viewHolder.setData(index);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.setData(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return memoArrayList.size();
     }
 }
