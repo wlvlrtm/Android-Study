@@ -16,9 +16,9 @@ import java.util.ArrayList;
 public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
-        TextView textView_Title;
-        TextView textView_Date;
-        CheckBox checkBox;
+        TextView textView_Title;    // Memo Title
+        TextView textView_Date;     // Memo Date
+        CheckBox checkBox;          // Memo Checkbox
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -30,7 +30,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.ViewHolder> {
 
             this.textView_Title.setOnClickListener(this);
             this.textView_Date.setOnClickListener(this);
-            checkBox.setOnCheckedChangeListener(this);
+            this.checkBox.setOnCheckedChangeListener(this);
         }
 
         public void setData(int index) {
@@ -40,14 +40,14 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.ViewHolder> {
             checkBox.setChecked(memo.isChecked());
         }
 
-        @Override
+        @Override   // ClickListener
         public void onClick(View view) {
-            int index = super.getAdapterPosition();
+            int index = super.getAdapterPosition(); // Clicked Item's index
             MemoListActivity memoListActivity = (MemoListActivity) textView_Title.getContext();
             memoListActivity.onMemoClicked(index);
         }
 
-        @Override
+        @Override   // CheckedChangeListener
         public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
             int index = super.getAdapterPosition();
             Memo memo = memoArrayList.get(index);
@@ -56,8 +56,9 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.ViewHolder> {
     }
 
 
-    ArrayList<Memo> memoArrayList;
+    ArrayList<Memo> memoArrayList;  // Memo List; MemoListActivity -> MemoAdapter
     LayoutInflater inflater;
+
 
     public MemoAdapter(Context context, ArrayList<Memo> memoArrayList) {
         this.inflater = LayoutInflater.from(context);
@@ -67,6 +68,7 @@ public class MemoAdapter extends RecyclerView.Adapter<MemoAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // View Create; Layout = memo.xml
         View view = inflater.inflate(R.layout.memo, parent, false);
         return new ViewHolder(view);
     }

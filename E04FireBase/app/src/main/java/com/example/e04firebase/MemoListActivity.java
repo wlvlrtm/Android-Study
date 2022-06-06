@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,11 +28,13 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ListIterator;
 
 public class MemoListActivity extends AppCompatActivity {
     MemoAdapter memoAdapter;
     ArrayList<Memo> memoArrayList;
+    ArrayList<String> keyArrayList;
     ActivityResultLauncher<Intent> activityResultLauncher;
     DatabaseReference item02;
 
@@ -42,22 +46,47 @@ public class MemoListActivity extends AppCompatActivity {
 
         /////
 
-        this.memoArrayList = new ArrayList<Memo>();
+        this.memoArrayList = new ArrayList<Memo>();     // Save Memos
+        this.keyArrayList = new ArrayList<String>();    // Save Keys
         this.memoAdapter = new MemoAdapter(this, this.memoArrayList);
 
         this.item02 = FirebaseDatabase.getInstance().getReference("item02");
-        this.item02.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                GenericTypeIndicator<ArrayList<Memo>> typeIndicator;
-                typeIndicator = new GenericTypeIndicator<ArrayList<Memo>>() {};
-                ArrayList<Memo> temp  = snapshot.getValue(typeIndicator);
+        this.item02.addChildEventListener(new ChildEventListener() {
+            @Override   // Memo Add
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                String key = snapshot.getKey();
+                Memo memo = snapshot.getValue(Memo.class);
 
-                if (temp != null) {
-                    MemoListActivity.this.memoArrayList.clear();
-                    MemoListActivity.this.memoArrayList.addAll(temp);
-                }
-                MemoListActivity.this.memoAdapter.notifyDataSetChanged();
+                memoArrayList.add(memo);
+                keyArrayList.add(key);
+
+                memoAdapter.notifyItemInserted(memoArrayList.size() - 1);
+            }
+
+            @Override   // Memo Edit
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                String key = snapshot.getKey();
+                Memo memo = snapshot.getValue(Memo.class);
+                int index = Collections.binarySearch(keyArrayList, key);
+
+                memoArrayList.set(index, memo);
+
+                memoAdapter.notifyItemChanged(index);
+            }
+
+            @Override   // Memo Del
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                String key = snapshot.getKey();
+                int index = Collections.binarySearch(keyArrayList, key);
+
+                memoArrayList.remove(index);
+                keyArrayList.remove(index);
+
+                memoAdapter.notifyItemRemoved(index);
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
             }
 
             @Override
@@ -82,13 +111,14 @@ public class MemoListActivity extends AppCompatActivity {
                             Integer index = (Integer)intent.getSerializableExtra("INDEX");
 
                             if (index == null) {    // New Memo Add
-                                memoArrayList.add(memo);
+                                String key = item02.push().getKey();
+                                item02.child(key).setValue(memo);
                             }
                             else {
-                                memoArrayList.set(index, memo);
+                                String key = keyArrayList.get(index);
+                                item02.child(key).setValue(memo);
                             }
-                            item02.setValue(MemoListActivity.this.memoArrayList);
-                            memoAdapter.notifyDataSetChanged();
+                            //memoAdapter.notifyDataSetChanged();
                         }
                     }
                 }
@@ -105,11 +135,11 @@ public class MemoListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_create) {
+        if (id == R.id.action_Create) {
             Intent intent = new Intent(this, MemoActivity.class);
             activityResultLauncher.launch(intent);
         }
-        else if (id == R.id.action_remove) {
+        else if (id == R.id.action_Remove) {
             removeMemos();
             return true;
         }
@@ -122,15 +152,12 @@ public class MemoListActivity extends AppCompatActivity {
         builder.setMessage(R.string.doYouWantToDelete);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                ListIterator<Memo> memoListIterator = MemoListActivity.this.memoArrayList.listIterator();
-                while (memoListIterator.hasNext()) {
-                    if (memoListIterator.next().isChecked()) {
-                        memoListIterator.remove();
+            public void onClick(DialogInterface dialogInterface, int index) {
+                for (int i = 0; i < memoArrayList.size(); ++i) {
+                    if(memoArrayList.get(i).isChecked()) {
+                        item02.child(keyArrayList.get(i)).removeValue();
                     }
                 }
-                MemoListActivity.this.memoAdapter.notifyDataSetChanged();
-                MemoListActivity.this.item02.setValue(MemoListActivity.this.memoArrayList);
             }
         });
         builder.setNegativeButton(R.string.no, null);
@@ -139,11 +166,12 @@ public class MemoListActivity extends AppCompatActivity {
     }
 
     public void onMemoClicked(int index) {
-        Intent intent = new Intent(this, MemoActivity.class);
         Memo memo = this.memoArrayList.get(index);
 
+        Intent intent = new Intent(this, MemoActivity.class);
         intent.putExtra("MEMO", memo);
         intent.putExtra("INDEX", index);
+
         activityResultLauncher.launch(intent);
     }
 }

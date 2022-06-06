@@ -6,17 +6,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 
 import java.util.Date;
 
 public class MemoActivity extends AppCompatActivity {
-    EditText editText_Title;
-    EditText editText_content;
+    EditText editText_Title;    // Title
+    EditText editText_content;  // Content
+    Memo memo;                  // Memo object
+    Integer index;              // Index; ArrayList<Memo> memoArrayList
 
-    Memo memo;
-    Integer index;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,15 +24,18 @@ public class MemoActivity extends AppCompatActivity {
 
         /////
 
-        this.editText_Title = findViewById(R.id.editText_title);
-        this.editText_content = findViewById(R.id.editText_content);
+        this.editText_Title = findViewById(R.id.editText_Title);
+        this.editText_content = findViewById(R.id.editText_Content);
 
+        // Memo info; IF New -> NULL, 0
         this.memo = (Memo)getIntent().getSerializableExtra("MEMO");
         this.index = (Integer)getIntent().getSerializableExtra("INDEX");
 
-        if (this.memo != null) {    // Memo RELOAD
+        if (this.memo != null) {    // Memo Edit; Recent Data Call
             this.editText_Title.setText(this.memo.getTitle());
             this.editText_content.setText(this.memo.getContent());
+        }
+        else {  // New Memo Create
         }
     }
 
@@ -53,10 +55,15 @@ public class MemoActivity extends AppCompatActivity {
                     editText_content.setError("본문을 입력하세요");
                 }
 
+                // New Memo Create; Title, content, Date
                 Memo memo = new Memo(title, content, new Date());
+
+                // Intent Set
                 Intent intent = new Intent();
                 intent.putExtra("MEMO", memo);
                 intent.putExtra("INDEX", index);
+
+                // Intent Return
                 setResult(RESULT_OK, intent);
                 finish();
         }

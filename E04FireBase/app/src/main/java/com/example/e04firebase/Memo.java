@@ -8,15 +8,18 @@ import java.util.Date;
 
 public class Memo implements Serializable {
     final static SimpleDateFormat dataFormat = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
-    String title;
-    String content;
-    Date date;
-    CheckBox checkBox;
-    boolean checked;
+    String title;       // Memo Title
+    String content;     // Memo Content
+    Date date;          // Memo Date
+    CheckBox checkBox;  // Memo del Checkbox
+    boolean checked;    // Is checkBox Checked?
 
+
+    // Default Constructor
     public Memo() {
     }
 
+    // Constructor
     public Memo(String title, String content, Date date) {
         this.title = title;
         this.content = content;

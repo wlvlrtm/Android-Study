@@ -19,11 +19,11 @@ public class MainActivity extends AppCompatActivity {
         Intent intent;
 
         switch (view.getId()) {
-            case R.id.button_Firebase1Activity:
+            case R.id.button_Firebase1Activity: // Firebase1Activity Call
                 intent = new Intent(this, Firebase1Activity.class);
                 startActivity(intent);
                 break;
-            case R.id.button_MemoListActivity:
+            case R.id.button_MemoListActivity:  // MemoListActivity Call
                 intent = new Intent(this, MemoListActivity.class);
                 startActivity(intent);
                 break;
