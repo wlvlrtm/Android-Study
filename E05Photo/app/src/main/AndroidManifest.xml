@@ -20,6 +20,11 @@
         android:theme="@style/Theme.E05Photo"
         tools:targetApi="31">
         <activity
+            android:name=".Photo3Activity"
+            android:exported="false"
+            android:label="@string/title_activity_photo3"
+            android:theme="@style/Theme.E05Photo.NoActionBar" />
+        <activity
             android:name=".Photo2Activity"
             android:exported="false" />
         <activity
@@ -42,7 +47,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
     </application>
 

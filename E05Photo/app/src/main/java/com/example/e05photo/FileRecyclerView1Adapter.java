@@ -33,6 +33,7 @@ public class FileRecyclerView1Adapter extends RecyclerView.Adapter<FileRecyclerV
         }
     }
 
+
     LayoutInflater layoutInflater;
     File[] files;
 
